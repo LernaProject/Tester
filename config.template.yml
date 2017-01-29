@@ -1,0 +1,52 @@
+db:
+  locator: pq://user:password@localhost:5432/dbname
+
+dirs:
+  problems:  ~/lerna.problems
+  compilers: ~/lerna.langs/compile
+  runners:   ~/lerna.langs/run
+  checkers:  ~/lerna.checkers/bin
+
+behaviour:
+  interval: 1 # sec
+  time_multiplier: 1
+  checker_comment_max_len: 255
+
+files:
+  # These three files are a part of public interface: the participant can safely freopen them.
+  stdin:  input.txt
+  stdout: output.txt
+  stderr: error.txt
+
+  compiler_log: compiler.log
+  ejudge_log:   ejudge.log
+
+logging:
+  version: 1
+
+  formatters:
+    attempt:
+      style: '{'
+      format: >-
+        [{asctime}] {contest.id}#{pic.number} ({problem.id})
+        | {user.username} ({user.login})
+        | {message} ({compiler.codename})
+      datefmt: '%d.%m.%y %H:%M'
+
+  handlers:
+    file:
+      level: INFO
+      formatter: attempt
+      class: logging.handlers.RotatingFileHandler
+      filename: summary.log
+      maxBytes: 4194304 # 4 MB
+      backupCount: 1
+
+    stderr:
+      level: WARN
+      formatter: attempt
+      class: logging.StreamHandler
+
+  root:
+    level: INFO
+    handlers: [file, stderr]
