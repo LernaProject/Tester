@@ -110,7 +110,7 @@ def run_tests(db, cnf, cwd, attempt, logger_info, data):
 
     print(tests_path, '*', sep=os.sep)
     for test_number, test_file in iterpattern(str(tests_path / problem.mask_in), 1):
-        print(problem.mask_in % test_number)
+        print(problem.mask_in % test_number, flush=True)
 
         db.update_attempt_result_and_stats(
             attempt.id, "Testing... %d" % test_number, max_time / 1000, max_memory)
@@ -121,6 +121,7 @@ def run_tests(db, cnf, cwd, attempt, logger_info, data):
         protocol.real_time = int(protocol.real_time * cnf["behaviour"]["time_multiplier"] + .5)
         max_time = max(max_time, protocol.cpu_time)
         max_memory = max(max_memory, protocol.vm_size >> 10)
+        checker_comment = ""
         if protocol.verdict is Verdict.TL:
             # ejudge-execute cannot tell TL apart from IL.
             if protocol.cpu_time < problem.time_limit and protocol.real_time >= problem.time_limit:
@@ -220,7 +221,7 @@ def process_attempt(db, cnf, cwd, attempt, logger_info):
 
     clean_dir(pathlib.Path())
 
-    print("Compiling...")
+    print("Compiling...", flush=True)
     db.update_attempt_result(attempt.id, "Compiling...")
     data, errors = compile_source(cnf, attempt.source, attempt.compiler.codename)
     if errors:
@@ -239,7 +240,7 @@ def process_attempt(db, cnf, cwd, attempt, logger_info):
 
 def run(cnf, cwd, name, sleep):
     print("Started in", cwd)
-    print()
+    print(flush=True)
     db = database.Connection(cnf["db"]["locator"])
     try:
         status = db.create_tester_status()
@@ -276,7 +277,7 @@ def run(cnf, cwd, name, sleep):
                         logging.exception("System error", extra=logger_info)
                         raise
                     finally:
-                        print()
+                        print(flush=True)
                 db.update_tester_status(status)
         finally:
             db.delete_tester_status(status)

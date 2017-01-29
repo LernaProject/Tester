@@ -34,10 +34,10 @@ def gracefully_restart(*args):
 def gracefully_shutdown(*args):
     global terminating
     if not terminating:
-        print("Shutting down")
+        print("Shutting down", flush=True)
         terminating = tester.needs_restarting = True
     else:
-        print("Terminating")
+        print("Terminating", flush=True)
         sys.exit()
 
 
