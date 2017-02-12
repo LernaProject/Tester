@@ -60,7 +60,7 @@ def main():
     cwd = pathlib.Path(args["<cwd>"])
 
     try:
-        cwd.mkdir(parents=True, exist_ok=True)
+        cwd.mkdir(parents=True)
     except FileExistsError:
         if not args["--force"] and next(cwd.iterdir(), None) is not None:
             print("Working directory is not empty. All files inside it will be deleted.")
