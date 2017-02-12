@@ -1,4 +1,4 @@
-import postgresql
+import postgresql.exceptions
 import models
 
 
@@ -115,15 +115,19 @@ class Connection:
         return self._create_tester_status.first()
 
     def acquire_untested_attempt(self, tester_name, result, available_compilers, available_runners):
-        with self._db.xact("SERIALIZABLE"):
-            res = self._get_untested_attempt.first(available_compilers, available_runners)
-            if res is None:
-                return None
-            self._acquire_attempt(res[0], tester_name, result)
-
-        problem = models.Problem(*res[2:10])
-        contest = models.Contest(*res[10:12])
-        pic = models.ProblemInContest(problem, contest, res[12])
-        user = models.User(*res[13:15])
-        compiler = models.Compiler(*res[15:18])
-        return models.Attempt(res[0], pic, user, res[1], compiler)
+        while True:
+            try:
+                with self._db.xact("SERIALIZABLE"):
+                    res = self._get_untested_attempt.first(available_compilers, available_runners)
+                    if res is None:
+                        return None
+                    self._acquire_attempt(res[0], tester_name, result)
+            except postgresql.exceptions.SerializationError:
+                pass
+            else:
+                problem = models.Problem(*res[2:10])
+                contest = models.Contest(*res[10:12])
+                pic = models.ProblemInContest(problem, contest, res[12])
+                user = models.User(*res[13:15])
+                compiler = models.Compiler(*res[15:18])
+                return models.Attempt(res[0], pic, user, res[1], compiler)
