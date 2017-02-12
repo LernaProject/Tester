@@ -8,8 +8,8 @@ class Protocol:
         for line in binary_str.splitlines():
             key, _, value = line.partition(b": ")
             if key == b"Status":
-                if value not in { b"OK", b"TL", b"ML", b"RT", b"SV" }:
-                    raise ValueError("ejudge-execute returned unknown Status:", value)
+                if value not in { b"OK", b"TL", b"ML", b"RT", b"SV", b"SE" }:
+                    raise ValueError("ejudge-execute returned unknown Status: %s" % value)
                 self.verdict = verdict.Verdict[value.decode()]
             elif key in { b"CPUTime", b"RealTime", b"VMSize" }:
                 try:
